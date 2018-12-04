@@ -1,0 +1,5 @@
+3.3V reicht für led driver (LDD 700H)
+I2C 
+	-SCL esp auf GPIO0
+	-SDA esp auf GPIO2
+	

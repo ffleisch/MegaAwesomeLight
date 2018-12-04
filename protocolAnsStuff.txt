@@ -1,0 +1,11 @@
+-soll Farben auf Befehl setzen
+-PWM modul hat 12 Bit
+-esp wird übersetzungstabellen beinhalten 8 zu 12 bit logarithmisch
+	-bessere schnittstelle
+	-3*255*2 byte=1530 byte
+-soll Farben intrepolieren und verläufe annehmen können
+	-zb FADE farbe1 farbe2 zeit
+-FLAGS!!!!!!!!
+	-blinkend
+	-intepolieren, instant setzen
+-tabellen parametrisch neu berechnen
