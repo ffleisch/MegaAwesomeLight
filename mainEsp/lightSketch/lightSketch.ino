@@ -4,8 +4,8 @@
 
 WiFiServer wifiServer(80);
 
-char ssid[64] = "Frouti";
-char password[64] =  "September2011?2014";
+char ssid[64] = "TC-A46AF";
+char password[64] = "Kzkm64Kvhc56";
 
 
 boolean useFade = false;
@@ -46,7 +46,6 @@ void calcTable(float (*func)(float)) {
     theTable[i].r = absWhite.r * (*func)(i / 255.f);
     theTable[i].g = absWhite.g * (*func)(i / 255.f);
     theTable[i].b = absWhite.b * (*func)(i / 255.f);
-
   }
 }
 
