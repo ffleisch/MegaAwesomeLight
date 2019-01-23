@@ -7,10 +7,10 @@ const char* password =  "Kzkm64Kvhc56";
 
 WiFiServer wifiServer(80);
 
-struct myCol{
-  int r=0;
-  int g=0;
-  int b=0;  
+struct myCol {
+  int r = 0;
+  int g = 0;
+  int b = 0;
 };
 
 struct myCol col;
@@ -19,32 +19,33 @@ struct myCol col;
 // called this way, it uses the default address 0x40
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
-void readRGBInt(myCol* inp,WiFiClient* myClient){
-   //long start=millis();
-   bool found=false;
-   char b;
-   //do{
-   if(myClient->available()>0)
-      b=myClient->read();
-     if(b=='R'){
-       inp->r=myClient->parseInt();
-       inp->g=myClient->parseInt();
-       inp->b=myClient->parseInt();
-       //found=true;
-       Serial.printf("r: %d g: %d b: %d set\n",inp->r,inp->g,inp->b);
-       //break;
-     }
-   //}while((millis()-start<30)&&(!found));
-   //col=CRGB(inp[0],inp[1],inp[2]);
-   //sprintf(msg,"%d %d %d\n",inp[0],inp[1],inp[2]);
-   //Serial.print(msg);
+void readRGBInt(myCol* inp, WiFiClient* myClient) {
+  //long start=millis();
+  bool found = false;
+  char b;
+  //do{
+  if (myClient->available() > 0) {
+    b = myClient->read();
+    if (b == 'R') {
+      inp->r = myClient->parseInt();
+      inp->g = myClient->parseInt();
+      inp->b = myClient->parseInt();
+      //found=true;
+      Serial.printf("r: %d g: %d b: %d set\n", inp->r, inp->g, inp->b);
+      //break;
+    }
+  }
+  //}while((millis()-start<30)&&(!found));
+  //col=CRGB(inp[0],inp[1],inp[2]);
+  //sprintf(msg,"%d %d %d\n",inp[0],inp[1],inp[2]);
+  //Serial.print(msg);
 }
 
 
-void setLight(myCol* inp){
-  pwm.setPWM(0, 0,inp->r);
-  pwm.setPWM(1, 0,inp->g);
-  pwm.setPWM(2, 0,inp->b);
+void setLight(myCol* inp) {
+  pwm.setPWM(0, 0, inp->r);
+  pwm.setPWM(1, 0, inp->g);
+  pwm.setPWM(2, 0, inp->b);
 }
 
 void setup() {
@@ -78,20 +79,20 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  col.r=0;
-  col.g=0;
-  col.b=0;
+  col.r = 0;
+  col.g = 0;
+  col.b = 0;
   setLight(&col);
 
-  col.r=100;
-  col.g=100;
-  col.b=100;
+  col.r = 100;
+  col.g = 100;
+  col.b = 100;
 
   WiFiClient client = wifiServer.available();
   if (client) {
-    
+
     while (client.connected()) {
-      readRGBInt(&col,&client);
+      readRGBInt(&col, &client);
       setLight(&col);
 
       yield();  // take a breather, required for ESP8266
@@ -100,7 +101,7 @@ void loop() {
 
     client.stop();
     Serial.println("Client disconnected");
- 
+
   }
 
 

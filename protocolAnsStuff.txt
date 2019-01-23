@@ -9,3 +9,21 @@
 	-blinkend
 	-intepolieren, instant setzen
 -tabellen parametrisch neu berechnen
+
+Befehle:
+
+	C000  3*8 bit Farbe
+	Soption=wert
+	
+	
+	
+	optionen:
+		FADE 0,1
+		FADETIME zeit
+		BLINK 0,1
+		BLINKTIME zeit
+		PASS password
+		SSID ssid
+		NORMWHITE int int int
+	
+	
