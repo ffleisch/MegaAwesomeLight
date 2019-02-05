@@ -27,7 +27,7 @@ public class Main extends Application {
 	public void start(Stage primaryStage) {
 		try {
 			ColorPicker colpick=new ColorPicker();
-			Socket mySocket=new Socket("192.168.1.28",80);
+			Socket mySocket=new Socket("192.168.0.99",80);
 			OutputStream out=mySocket.getOutputStream();
 			
 			 colpick.setOnAction(new EventHandler() {

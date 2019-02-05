@@ -17,7 +17,7 @@ public class program {
 		
 		try {
 			Random rand=new Random();
-			Socket mySocket=new Socket("192.168.1.28",80);
+			Socket mySocket=new Socket("192.168.0.99",80);
 			OutputStream out=mySocket.getOutputStream();
 			mySocket.getInputStream();
 			int r=0;
