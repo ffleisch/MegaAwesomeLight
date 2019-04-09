@@ -27,11 +27,11 @@ public class Main extends Application {
 	public void start(Stage primaryStage) {
 		try {
 			ColorPicker colpick=new ColorPicker();
-			Socket mySocket=new Socket("192.168.0.99",80);
+			Socket mySocket=new Socket("192.168.1.117",80);
 			OutputStream out=mySocket.getOutputStream();
 			
-			 colpick.setOnAction(new EventHandler() {
-			     public void handle(Event t) {
+			 colpick.setOnAction(new EventHandler<ActionEvent>() {
+			     public void handle(ActionEvent t) {
 			         Color c = colpick.getValue();
 			         try {
 						sendCol(mySocket,(int)(c.getRed()*255),(int)(c.getGreen()*255),(int)(c.getBlue()*255));
@@ -42,9 +42,27 @@ public class Main extends Application {
 			     }
 			 });
 
-			
+			 
+			 
+			 Button test=new Button();
+			test.setOnAction(new EventHandler<ActionEvent>() {
+				
+				@Override
+				public void handle(ActionEvent event) {
+					try {
+						mySocket.sendUrgentData(255);
+						mySocket.sendUrgentData(000);
+						mySocket.sendUrgentData(000);
+						mySocket.sendUrgentData(255);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			});
+			 test.layoutXProperty().set(100);
 			GridPane root = new GridPane();
-			root.getChildren().add(colpick);
+			root.getChildren().addAll(colpick,test);
 			Scene scene = new Scene(root,400,400);
 			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			primaryStage.setScene(scene);

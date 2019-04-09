@@ -4,8 +4,8 @@
 
 WiFiServer wifiServer(80);
 
-char ssid[64] = "TC-A46AF";
-char password[64] = "Kzkm64Kvhc56";
+char ssid[64] = "Gulasch mit Kraut";//"TC-A46AF";
+char password[64] = "basis nord richard blau";//"Kzkm64Kvhc56";
 
 
 boolean useFade = false;
@@ -19,6 +19,18 @@ struct longCol {
   int g;
   int b;
 };
+
+
+//ein schritt im farbverlauf
+struct colStep{
+  longCol myCol;
+  int duration;
+};
+
+
+colStep* fadeTable;
+int tableLength;
+
 
 struct longCol theTable[256];
 struct longCol col = (longCol) {
@@ -74,10 +86,40 @@ void setup() {
   Wire.setClock(400000);
 }
 
+#define COMMAND 0x80
+
+//#define 
+
+
+
+#define CMD_LENGTH 3
+byte bytes[CMD_LENGTH];
+
+
 void readCommand(Stream* inpStream) {
   char b;
   if (inpStream->available() > 0) {
     b = inpStream->read();
+
+    while (inpStream->available()<CMD_LENGTH){
+        yield();    
+    }
+
+    for(int i=0;i<CMD_LENGTH;i++){
+      bytes[i]=inpStream->read();  
+    }
+    
+    if(b&&COMMAND){
+      b&=127;
+      byte cmd=b&&0xF0;
+      
+      Serial.printf("%x\n",b);
+      Serial.printf("%x\n",cmd);
+      
+    }else{
+      
+    }
+    /*
     if (b == 'C') {
       while (inpStream->available() < 3) {
         //Serial.println("incomplete color!");
@@ -153,7 +195,9 @@ void readCommand(Stream* inpStream) {
         }
       }
     }
+    //*/
   }
+
 }
 
 void readColor() {
@@ -185,6 +229,7 @@ void loop() {
   WiFiClient myClient = wifiServer.available();
   if (myClient) {
     Serial.println("Client connected");
+    //myClient.printf("Client connected");
     while (myClient.connected()) {
       readCommand(&myClient);
       readCommand(&Serial);
@@ -197,5 +242,4 @@ void loop() {
     Serial.println("Client disconnected");
   }
   readCommand(&Serial);
-
 }
