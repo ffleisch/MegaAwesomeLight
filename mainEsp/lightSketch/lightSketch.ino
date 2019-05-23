@@ -22,14 +22,14 @@ struct longCol {
 
 
 //ein schritt im farbverlauf
-struct colStep{
+struct colStep {
   longCol myCol;
   int duration;
 };
 
 
 colStep* fadeTable;
-int tableLength;
+int tableLength=3;
 
 
 struct longCol theTable[256];
@@ -67,10 +67,27 @@ void setLight(longCol* inp) {
   pwm.setPWM(2, 0, inp->b);
 }
 
+void setLightDebug(longCol* inp){
+  Serial.println("set Light:");
+  Serial.println(inp->r);
+  Serial.println(inp->g);
+  Serial.println(inp->b);
+}
+
 void setup() {
   Serial.begin(115200);
   Serial.println("Super Mega Awesome Light!");
 
+
+
+  //debug
+  fadeTable=(colStep*)malloc(sizeof(colStep)*3);
+  fadeTable[0]={.myCol={.r=50,.g=2000,.b=1300},.duration=500};
+  fadeTable[1]={.myCol={.r=3000,.g=1000,.b=10},.duration=2000};
+  fadeTable[2]={.myCol={.r=0,.g=4000,.b=10},.duration=1100};
+    
+
+  
   //fill lookup table
   calcTable(&dimFuncLog);
 
@@ -87,40 +104,69 @@ void setup() {
 }
 
 #define COMMAND 0x80
-
-//#define 
-
-
-
+#define SEND_TABLE 0x1
+//#define
 #define CMD_LENGTH 3
+
 byte bytes[CMD_LENGTH];
 
+void readTimeTable(Stream* inp, int num) {
+  for(int i=0;i<num*sizeof(colStep);i++){
+    
+  }
+}
+
+
+colStep* currentStep=fadeTable;
+colStep* nextStep=fadeTable;
+int lastStepStart=0;
+
+void setLightFromTable(){
+    Serial.println("SetFromTable");
+    if(millis()-lastStepStart>=currentStep->duration){
+      currentStep=nextStep;
+      //TODO dieser scheiss
+      nextStep=fadeTable+(currentStep-fadeTable+1)%tableLength;
+      lastStepStart=millis();    
+    }
+    
+    //setLightDebug(&currentStep->myCol);
+    //setLight(&currentStep->myCol);
+}
 
 void readCommand(Stream* inpStream) {
   char b;
   if (inpStream->available() > 0) {
     b = inpStream->read();
 
-    while (inpStream->available()<CMD_LENGTH){
-        yield();    
+    while (inpStream->available() < CMD_LENGTH) {
+      yield();
     }
 
-    for(int i=0;i<CMD_LENGTH;i++){
-      bytes[i]=inpStream->read();  
+    for (int i = 0; i < CMD_LENGTH; i++) {
+      bytes[i] = inpStream->read();
     }
-    
-    if(b&&COMMAND){
-      b&=127;
-      byte cmd=b&&0xF0;
-      
-      Serial.printf("%x\n",b);
-      Serial.printf("%x\n",cmd);
-      
-    }else{
-      
+
+    if (b && COMMAND) {
+      b &= 127;
+      byte cmd = b && 0xF0;
+
+      Serial.printf("%x\n", b);
+      Serial.printf("%x\n", cmd);
+
+      if (b ^ SEND_TABLE) {
+        short num=*((short*)(b+1));
+        Serial.printf("num: %d\n", num);
+
+        //TODO
+        //readTable(inpStream,num);
+      }
+
     }
+
+
     /*
-    if (b == 'C') {
+      if (b == 'C') {
       while (inpStream->available() < 3) {
         //Serial.println("incomplete color!");
         yield();
@@ -128,8 +174,8 @@ void readCommand(Stream* inpStream) {
       col.r = theTable[inpStream->read()].r;
       col.g = theTable[inpStream->read()].g;
       col.b = theTable[inpStream->read()].b;
-    }
-    if (b == 'S') {
+      }
+      if (b == 'S') {
       char command[64];
       char body[64];
       inpStream->readBytesUntil('=', command, 64);
@@ -194,8 +240,8 @@ void readCommand(Stream* inpStream) {
           inpStream->printf("%d: %d,%d,%d\n", i, theTable[i].r, theTable[i].g, theTable[i].b);
         }
       }
-    }
-    //*/
+      }
+      //*/
   }
 
 }
@@ -225,7 +271,8 @@ void resetWifi() {
 
 
 void loop() {
-  setLight(&col);
+  //setLight(&col);
+  //setLightDebug(&fadeTable[0].myCol);
   WiFiClient myClient = wifiServer.available();
   if (myClient) {
     Serial.println("Client connected");
@@ -233,13 +280,13 @@ void loop() {
     while (myClient.connected()) {
       readCommand(&myClient);
       readCommand(&Serial);
-      setLight(&col);
       yield();  // take a breather, required for ESP8266
     }
-    setLight(&col);
 
     myClient.stop();
     Serial.println("Client disconnected");
   }
   readCommand(&Serial);
+  setLightFromTable();
+
 }
