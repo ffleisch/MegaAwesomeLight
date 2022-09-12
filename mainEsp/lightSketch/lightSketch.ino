@@ -4,15 +4,14 @@
 
 WiFiServer wifiServer(80);
 
-char ssid[64] = "Gulasch mit Kraut";//"TC-A46AF";
-char password[64] = "basis nord richard blau";//"Kzkm64Kvhc56";
+char ssid[64] = "TC-A46AF";//"Gulasch mit Kraut";//
+char password[64] = "Kzkm64Kvhc56";//"basis nord richard blau";//
 
 
 boolean useFade = false;
 int fadeTime = 1000;
 boolean useBlink = false;
 int blinkTime = 500;
-
 
 struct longCol {
   int r;
@@ -39,6 +38,10 @@ struct longCol col = (longCol) {
 struct longCol absWhite = (longCol) {
   4095, 3500, 2500
 };
+
+
+colStep* currentStep=fadeTable;
+colStep* nextStep=fadeTable;
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
@@ -82,6 +85,8 @@ void setup() {
 
   //debug
   fadeTable=(colStep*)malloc(sizeof(colStep)*3);
+  currentStep=fadeTable;
+  nextStep=fadeTable;
   fadeTable[0]={.myCol={.r=50,.g=2000,.b=1300},.duration=500};
   fadeTable[1]={.myCol={.r=3000,.g=1000,.b=10},.duration=2000};
   fadeTable[2]={.myCol={.r=0,.g=4000,.b=10},.duration=1100};
@@ -117,17 +122,25 @@ void readTimeTable(Stream* inp, int num) {
 }
 
 
-colStep* currentStep=fadeTable;
-colStep* nextStep=fadeTable;
+
 int lastStepStart=0;
 
+longCol res;
 void setLightFromTable(){
-    Serial.println("SetFromTable");
-    if(millis()-lastStepStart>=currentStep->duration){
+    //Serial.println("SetFromTable");
+    float dt=float(millis()-lastStepStart)/currentStep->duration;
+    if(dt>=1){
       currentStep=nextStep;
       //TODO dieser scheiss
-      nextStep=fadeTable+(currentStep-fadeTable+1)%tableLength;
+      nextStep=&fadeTable[((currentStep-fadeTable+1)%tableLength)];
       lastStepStart=millis();    
+      Serial.printf("%x\n",nextStep);
+
+      setLightDebug(&currentStep->myCol);
+
+    }else{
+      interpolate(&currentStep->myCol,&nextStep->myCol,&res,dt);
+      setLight(&res);
     }
     
     //setLightDebug(&currentStep->myCol);
@@ -248,6 +261,12 @@ void readCommand(Stream* inpStream) {
 
 void readColor() {
   //Todo
+}
+
+void interpolate(longCol* c1,longCol* c2,longCol* res,float v){
+  res->r=v*c2->r+(1-v)*c1->r;
+  res->g=v*c2->g+(1-v)*c1->g;
+  res->b=v*c2->b+(1-v)*c1->b;
 }
 
 void connectWifi() {
